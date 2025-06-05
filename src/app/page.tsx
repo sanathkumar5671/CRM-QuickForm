@@ -1,11 +1,45 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useCallback } from "react";
 import { integrationApp } from "@/lib/integration";
 import type { FormData, CRMType } from "./types/crm";
 import CRMSelector from "./components/CRMSelector";
 import CRMForm from "./components/CRMForm";
 import { useRouter, useSearchParams } from "next/navigation";
+
+// Separate component for handling search params
+const SearchParamsHandler = ({
+  onStepChange,
+  onCRMChange,
+  onFormDataReset,
+}: {
+  onStepChange: (step: "select" | "form") => void;
+  onCRMChange: (crm: CRMType | null) => void;
+  onFormDataReset: () => void;
+}) => {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const stepParam = searchParams.get("step");
+    const crmParam = searchParams.get("crm");
+
+    // Only update if the params have actually changed
+    if (
+      stepParam === "form" &&
+      (crmParam === "pipedrive" || crmParam === "hubspot")
+    ) {
+      onCRMChange(crmParam as CRMType);
+      onStepChange("form");
+      onFormDataReset();
+    } else if (stepParam === "select") {
+      onStepChange("select");
+      onCRMChange(null);
+      onFormDataReset();
+    }
+  }, [searchParams]); // Remove the callback dependencies since they're stable
+
+  return null;
+};
 
 export default function Home() {
   const [formData, setFormData] = useState<FormData>({
@@ -19,51 +53,24 @@ export default function Home() {
   const [step, setStep] = useState<"select" | "form">("select");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
 
-  useEffect(() => {
-    const stepParam = searchParams.get("step");
-    const crmParam = searchParams.get("crm");
-    if (
-      stepParam === "form" &&
-      (crmParam === "pipedrive" || crmParam === "hubspot")
-    ) {
-      setSelectedCRM(crmParam as CRMType);
-      setStep("form");
-      setFormData({
-        name: "",
-        email: "",
-        phoneNumber: "",
-        companyName: "",
-        pronouns: "",
-      });
-    } else if (stepParam === "select") {
-      setStep("select");
-      setSelectedCRM(null);
-      setFormData({
-        name: "",
-        email: "",
-        phoneNumber: "",
-        companyName: "",
-        pronouns: "",
-      });
-    }
-  }, [searchParams]);
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const { name, value } = e.target;
+      setFormData((prev: FormData) => ({
+        ...prev,
+        [name]: value,
+      }));
+    },
+    []
+  );
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev: FormData) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSelectCRM = (crm: CRMType) => {
+  const handleSelectCRM = useCallback((crm: CRMType) => {
     setSelectedCRM(crm);
     setStep("form");
-  };
+  }, []);
 
-  const handleBackToSelect = () => {
+  const handleBackToSelect = useCallback(() => {
     setStep("select");
     setSelectedCRM(null);
     setFormData({
@@ -73,42 +80,55 @@ export default function Home() {
       companyName: "",
       pronouns: "",
     });
-  };
+  }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setIsLoading(true);
 
-    let resultId = null;
-    let errorMsg = null;
+      let resultId = null;
+      let errorMsg = null;
 
-    try {
-      if (!selectedCRM) return;
-      const result = await integrationApp
-        .connection(selectedCRM)
-        .action("create-contact")
-        .run({
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phoneNumber,
-          company: formData.companyName,
-          pronouns: formData.pronouns,
-        });
+      try {
+        if (!selectedCRM) return;
+        const result = await integrationApp
+          .connection(selectedCRM)
+          .action("create-contact")
+          .run({
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phoneNumber,
+            company: formData.companyName,
+            pronouns: formData.pronouns,
+          });
 
-      resultId = result.output?.id;
-    } catch (err) {
-      errorMsg =
-        err instanceof Error ? err.message : "Failed to create contact";
-    } finally {
-      setIsLoading(false);
-      // Navigate to result page with query params
-      router.push(
-        `/result?crmType=${selectedCRM}&contactLink=${encodeURIComponent(
-          resultId || ""
-        )}&error=${encodeURIComponent(errorMsg || "")}`
-      );
-    }
-  };
+        resultId = result.output?.id;
+      } catch (err) {
+        errorMsg =
+          err instanceof Error ? err.message : "Failed to create contact";
+      } finally {
+        setIsLoading(false);
+        // Navigate to result page with query params
+        router.push(
+          `/result?crmType=${selectedCRM}&contactLink=${encodeURIComponent(
+            resultId || ""
+          )}&error=${encodeURIComponent(errorMsg || "")}`
+        );
+      }
+    },
+    [selectedCRM, formData, router]
+  );
+
+  const resetFormData = useCallback(() => {
+    setFormData({
+      name: "",
+      email: "",
+      phoneNumber: "",
+      companyName: "",
+      pronouns: "",
+    });
+  }, []);
 
   return (
     <Suspense
@@ -118,6 +138,11 @@ export default function Home() {
         </div>
       }
     >
+      <SearchParamsHandler
+        onStepChange={setStep}
+        onCRMChange={setSelectedCRM}
+        onFormDataReset={resetFormData}
+      />
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
         <div className="w-full max-w-md mx-auto">
           <div className="bg-white rounded-2xl shadow-xl p-8">
@@ -135,7 +160,6 @@ export default function Home() {
                 selectedCRM={selectedCRM}
               />
             )}
-            {/* Result is now shown only on the /result page */}
           </div>
         </div>
       </div>
