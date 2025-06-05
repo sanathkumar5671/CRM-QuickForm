@@ -53,6 +53,53 @@ crm_quickform/
 
 - Node.js 18 or higher
 - npm or yarn
+- HubSpot account
+- Pipedrive account
+
+### Required Credentials
+
+#### HubSpot
+
+1. Go to [HubSpot Settings](https://app.hubspot.com/settings)
+2. Navigate to Account Setup > Account Information
+3. Find your Portal ID in the Account Information section
+4. The base URL will be in the format: `https://app-{region}.hubspot.com`
+
+#### Pipedrive
+
+1. Log in to your Pipedrive account
+2. The base URL will be in the format: `https://{company-name}.pipedrive.com`
+3. You can find this in your browser's address bar when logged into Pipedrive
+
+### Environment Setup
+
+1. Create a `.env.local` file in the project root:
+
+```env
+# HubSpot Configuration
+NEXT_PUBLIC_HUBSPOT_BASE_URL=https://app-{region}.hubspot.com
+NEXT_PUBLIC_HUBSPOT_PORTAL_ID=your_portal_id
+
+# Pipedrive Configuration
+NEXT_PUBLIC_PIPEDRIVE_BASE_URL=https://{company-name}.pipedrive.com
+
+# Integration App Token (if required)
+NEXT_PUBLIC_INTEGRATION_APP_TOKEN=your_integration_token
+```
+
+2. Create a `.env.example` file (for reference):
+
+```env
+# HubSpot Configuration
+NEXT_PUBLIC_HUBSPOT_BASE_URL=https://app-{region}.hubspot.com
+NEXT_PUBLIC_HUBSPOT_PORTAL_ID=your_portal_id
+
+# Pipedrive Configuration
+NEXT_PUBLIC_PIPEDRIVE_BASE_URL=https://{company-name}.pipedrive.com
+
+# Integration App Token
+NEXT_PUBLIC_INTEGRATION_APP_TOKEN=your_integration_token
+```
 
 ### Installation
 
@@ -69,13 +116,18 @@ crm_quickform/
    npm install
    ```
 
-3. Run the development server:
+3. Set up environment variables:
+
+   - Copy `.env.example` to `.env.local`
+   - Fill in your actual credentials
+
+4. Run the development server:
 
    ```bash
    npm run dev
    ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
 ## Usage
 
@@ -93,6 +145,7 @@ To add support for additional CRM platforms:
 1. Update the `CRMType` type in `src/app/types/crm.ts`
 2. Add the new CRM to the `crmOptions` array in `CRMSelector.tsx`
 3. Implement the connection in `src/lib/integration.ts`
+4. Add corresponding environment variables
 
 ### Styling
 
@@ -110,6 +163,14 @@ The application follows accessibility best practices:
 - Keyboard navigation
 - Color contrast compliance
 - Focus management
+
+## Deployment
+
+When deploying to platforms like Vercel:
+
+1. Add all environment variables in your deployment platform's settings
+2. Ensure all required environment variables are set
+3. Never commit `.env.local` to version control
 
 ## License
 
