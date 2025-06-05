@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { integrationApp } from "@/lib/integration";
 import type { FormData, CRMType } from "./types/crm";
 import CRMSelector from "./components/CRMSelector";
@@ -111,26 +111,34 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-      <div className="w-full max-w-md mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <h1 className="text-3xl font-bold text-center text-gray-900 mb-10 tracking-tight">
-            Create CRM Contact
-          </h1>
-          {step === "select" && <CRMSelector onSelect={handleSelectCRM} />}
-          {step === "form" && selectedCRM && (
-            <CRMForm
-              formData={formData}
-              onChange={handleInputChange}
-              onSubmit={handleSubmit}
-              isLoading={isLoading}
-              onBack={handleBackToSelect}
-              selectedCRM={selectedCRM}
-            />
-          )}
-          {/* Result is now shown only on the /result page */}
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          Loading...
+        </div>
+      }
+    >
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+        <div className="w-full max-w-md mx-auto">
+          <div className="bg-white rounded-2xl shadow-xl p-8">
+            <h1 className="text-3xl font-bold text-center text-gray-900 mb-10 tracking-tight">
+              Create CRM Contact
+            </h1>
+            {step === "select" && <CRMSelector onSelect={handleSelectCRM} />}
+            {step === "form" && selectedCRM && (
+              <CRMForm
+                formData={formData}
+                onChange={handleInputChange}
+                onSubmit={handleSubmit}
+                isLoading={isLoading}
+                onBack={handleBackToSelect}
+                selectedCRM={selectedCRM}
+              />
+            )}
+            {/* Result is now shown only on the /result page */}
+          </div>
         </div>
       </div>
-    </div>
+    </Suspense>
   );
 }
