@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { integrationApp } from "@/lib/integration";
 import type { FormData, CRMType } from "./types/crm";
 import CRMSelector from "./components/CRMSelector";
 import CRMForm from "./components/CRMForm";
-import CRMResult from "./components/CRMResult";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function Home() {
   const [formData, setFormData] = useState<FormData>({
@@ -18,8 +18,37 @@ export default function Home() {
   const [selectedCRM, setSelectedCRM] = useState<CRMType | null>(null);
   const [step, setStep] = useState<"select" | "form">("select");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [contactLink, setContactLink] = useState<string | null>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const stepParam = searchParams.get("step");
+    const crmParam = searchParams.get("crm");
+    if (
+      stepParam === "form" &&
+      (crmParam === "pipedrive" || crmParam === "hubspot")
+    ) {
+      setSelectedCRM(crmParam as CRMType);
+      setStep("form");
+      setFormData({
+        name: "",
+        email: "",
+        phoneNumber: "",
+        companyName: "",
+        pronouns: "",
+      });
+    } else if (stepParam === "select") {
+      setStep("select");
+      setSelectedCRM(null);
+      setFormData({
+        name: "",
+        email: "",
+        phoneNumber: "",
+        companyName: "",
+        pronouns: "",
+      });
+    }
+  }, [searchParams]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -37,8 +66,6 @@ export default function Home() {
   const handleBackToSelect = () => {
     setStep("select");
     setSelectedCRM(null);
-    setError(null);
-    setContactLink(null);
     setFormData({
       name: "",
       email: "",
@@ -51,8 +78,9 @@ export default function Home() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError(null);
-    setContactLink(null);
+
+    let resultId = null;
+    let errorMsg = null;
 
     try {
       if (!selectedCRM) return;
@@ -67,11 +95,18 @@ export default function Home() {
           pronouns: formData.pronouns,
         });
 
-      setContactLink(result.output?.id);
+      resultId = result.output?.id;
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create contact");
+      errorMsg =
+        err instanceof Error ? err.message : "Failed to create contact";
     } finally {
       setIsLoading(false);
+      // Navigate to result page with query params
+      router.push(
+        `/result?crmType=${selectedCRM}&contactLink=${encodeURIComponent(
+          resultId || ""
+        )}&error=${encodeURIComponent(errorMsg || "")}`
+      );
     }
   };
 
@@ -93,7 +128,7 @@ export default function Home() {
               selectedCRM={selectedCRM}
             />
           )}
-          <CRMResult error={error} contactLink={contactLink} />
+          {/* Result is now shown only on the /result page */}
         </div>
       </div>
     </div>
