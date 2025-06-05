@@ -36,7 +36,7 @@ const SearchParamsHandler = ({
       onCRMChange(null);
       onFormDataReset();
     }
-  }, [searchParams]); // Remove the callback dependencies since they're stable
+  }, [searchParams, onCRMChange, onFormDataReset, onStepChange]);
 
   return null;
 };
