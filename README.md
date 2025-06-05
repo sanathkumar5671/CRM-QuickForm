@@ -1,36 +1,126 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# CRM Quick Form
+
+A modern, responsive web application for quickly creating contacts in multiple CRM platforms.
+
+## Overview
+
+CRM Quick Form provides a streamlined interface for creating contacts in different CRM systems like Pipedrive and HubSpot. Built with Next.js and styled with Tailwind CSS, it features a multi-step process that guides users through CRM selection and contact form submission, making it intuitive and efficient.
+
+## Features
+
+- **Multi-CRM Support**: Connect to Pipedrive or HubSpot from a single interface
+- **Two-Step Process**: Select CRM first, then fill out contact details
+- **Responsive Design**: Works on desktop and mobile devices
+- **Modern UI**: Clean, accessible interface with Tailwind CSS
+- **Result Page**: Clear feedback on contact creation with relevant links
+- **Streamlined Workflow**: Add multiple contacts to the same CRM with minimal clicks
+
+## Tech Stack
+
+- **Frontend**: Next.js 14 (React)
+- **Styling**: Tailwind CSS
+- **Languages**: TypeScript
+- **Architecture**: Component-based with proper separation of concerns
+
+## Project Structure
+
+```
+crm_quickform/
+├── src/
+│   ├── app/
+│   │   ├── components/
+│   │   │   ├── CRMSelector.tsx    # CRM selection component
+│   │   │   ├── CRMForm.tsx        # Contact form component
+│   │   │   └── CRMResult.tsx      # Result display component
+│   │   ├── types/
+│   │   │   └── crm.ts             # TypeScript types for the app
+│   │   ├── result/
+│   │   │   └── page.tsx           # Result page
+│   │   ├── globals.css            # Global styles
+│   │   ├── layout.tsx             # App layout
+│   │   └── page.tsx               # Main page (CRM selection & form)
+│   └── lib/
+│       └── integration.ts         # CRM integration API
+├── public/                        # Static assets
+├── tailwind.config.js             # Tailwind configuration
+├── tsconfig.json                  # TypeScript configuration
+└── package.json                   # Project dependencies
+```
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- Node.js 18 or higher
+- npm or yarn
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Installation
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Clone the repository:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+   ```bash
+   git clone https://github.com/yourusername/crm_quickform.git
+   cd crm_quickform
+   ```
 
-## Learn More
+2. Install dependencies:
 
-To learn more about Next.js, take a look at the following resources:
+   ```bash
+   npm install
+   ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+3. Run the development server:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+   ```bash
+   npm run dev
+   ```
 
-## Deploy on Vercel
+4. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Usage
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. **Select CRM**: Choose between Pipedrive and HubSpot
+2. **Fill Form**: Enter contact details in the form
+3. **Submit**: Create the contact in the selected CRM
+4. **View Result**: See confirmation and navigate to add more contacts
+
+## Customization
+
+### Adding More CRMs
+
+To add support for additional CRM platforms:
+
+1. Update the `CRMType` type in `src/app/types/crm.ts`
+2. Add the new CRM to the `crmOptions` array in `CRMSelector.tsx`
+3. Implement the connection in `src/lib/integration.ts`
+
+### Styling
+
+The application uses Tailwind CSS for styling. Customize the look and feel by modifying:
+
+- `tailwind.config.js` for theme settings
+- Component-level classes for specific UI elements
+
+## Accessibility
+
+The application follows accessibility best practices:
+
+- Semantic HTML
+- ARIA attributes where appropriate
+- Keyboard navigation
+- Color contrast compliance
+- Focus management
+
+## License
+
+[MIT License](LICENSE)
+
+## Acknowledgements
+
+- [Next.js](https://nextjs.org/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [React Icons](https://react-icons.github.io/react-icons/)
+
+---
+
+This project was created as a demonstration of modern React application development with component-based architecture and type safety.
